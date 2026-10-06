@@ -1,4 +1,8 @@
 import java.util.zip.ZipFile
+
+val paperApiVersion = providers.gradleProperty("paperApiVersion")
+    .orElse("26.3.build.157-beta")
+    .get()
 import org.gradle.jvm.tasks.Jar
 import top.ellan.mahjong.build.CraftEngineBundleGenerator
 
@@ -96,8 +100,8 @@ val generateRuntimeLibraryCatalog =
 dependencies {
     internalProjectPaths.forEach { implementation(project(it)) }
 
-    compileOnly("io.papermc.paper:paper-api:26.3.build.157-beta")
-    testImplementation("io.papermc.paper:paper-api:26.3.build.157-beta")
+    compileOnly("io.papermc.paper:paper-api:$paperApiVersion")
+    testImplementation("io.papermc.paper:paper-api:$paperApiVersion")
     compileOnly("net.momirealms:craft-engine-core:26.8")
     compileOnly("net.momirealms:craft-engine-bukkit:26.8")
 
