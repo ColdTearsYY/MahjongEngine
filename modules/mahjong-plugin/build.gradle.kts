@@ -1,14 +1,15 @@
 import java.util.zip.ZipFile
 
-val paperApiVersion = providers.gradleProperty("paperApiVersion")
-    .orElse("26.3.build.157-beta")
-    .get()
 import org.gradle.jvm.tasks.Jar
 import top.ellan.mahjong.build.CraftEngineBundleGenerator
 
 plugins {
     java
 }
+
+val paperApiVersion = providers.gradleProperty("paperApiVersion")
+    .orElse("26.3.build.157-beta")
+    .get()
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
