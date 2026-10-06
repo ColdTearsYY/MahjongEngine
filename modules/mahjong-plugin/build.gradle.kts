@@ -96,8 +96,8 @@ val generateRuntimeLibraryCatalog =
 dependencies {
     internalProjectPaths.forEach { implementation(project(it)) }
 
-    compileOnly("io.papermc.paper:paper-api:26.2.build.111-stable")
-    testImplementation("io.papermc.paper:paper-api:26.2.build.111-stable")
+    compileOnly("io.papermc.paper:paper-api:26.3.build.157-beta")
+    testImplementation("io.papermc.paper:paper-api:26.3.build.157-beta")
     compileOnly("net.momirealms:craft-engine-core:26.8")
     compileOnly("net.momirealms:craft-engine-bukkit:26.8")
 
