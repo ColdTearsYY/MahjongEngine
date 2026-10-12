@@ -2,6 +2,16 @@
 
 ## 2.0.0 - Unreleased
 
+### Riichi candidate support (fork)
+
+- Added an optional build-pinned fork Ed25519 signer alongside the original official signer.
+  Missing official roots, invalid fork keys, unknown signatures and tampered payloads fail closed.
+- Distributed the unchanged upstream Riichi 2.0.2 CI code/resource pair with provenance,
+  licenses, fixed SHA-256/size metadata and a fork-signed format-2 registry.
+- Added signed pair installation, resource tamper rejection, deterministic four-player setup,
+  100 rule transitions, view generation and snapshot restoration tests. Windows/Linux CI supplies
+  both pinned artifacts. Existing bytecode restrictions and rule execution budgets remain enabled.
+
 ### Lophine 26.3 compatibility (fork)
 
 - Updated the CraftEngine compile/test dependencies and runtime gate to the 26.9 API line,

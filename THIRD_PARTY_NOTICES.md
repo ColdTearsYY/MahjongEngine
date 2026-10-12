@@ -27,3 +27,12 @@ Available license and notice texts remain packaged under `META-INF/licenses`. Op
 - The signed Riichi, MCR and Sichuan pure rule JARs and their separately signed resource ZIPs. Each rule resource ZIP carries its own sound attribution and terms.
 
 No GB-Mahjong native source/library, `mahjong-utils`, Kotlin runtime or InvSync is distributed by MahjongPaper 2.0.
+
+## Fork Riichi candidate distribution
+
+`distribution/riichi/2.0.2` contains unchanged CI artifacts from
+`EllanServer/riichi-mahjong-java` commit `fa2268a0516c60e40d731085227587b7f68de037`.
+The upstream MIT license (copyright 2026 Arbousier1) is preserved in
+`distribution/riichi/LICENSE.riichi-upstream.txt`. Resource attribution remains in the ZIP's
+`META-INF/RESOURCEPACK_ATTRIBUTION.md`. This is a fork testing distribution, not an upstream
+stable release; see `distribution/riichi/README.md` for provenance and hashes.

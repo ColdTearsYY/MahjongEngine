@@ -8,6 +8,8 @@ MahjongPaper 是一个面向 Paper/Folia 的 CraftEngine 麻将核心。核心�
 
 本 fork 的 `fix/lophine-26.3-compat` 分支适配 Lophine 26.3 和 CraftEngine 26.9。已测环境、构建步骤与规则包限制见[兼容验证说明](docs/lophine-26.3-compatibility.zh-CN.md)。
 
+需要启用日麻时，请按[日麻 2.0.2 候选启用指南](docs/riichi-lophine-26.3.zh-CN.md)安装本 fork 签名的规则与资源包，并在完整重启后选择日麻预设。
+
 目前支持三类规则身份：
 
 - `riichi`：日麻；

@@ -75,15 +75,24 @@ val rulePackPublicKey =
         .gradleProperty("mahjongRulePackPublicKeyBase64")
         .orElse(providers.environmentVariable("MAHJONG_RULE_PACK_PUBLIC_KEY_BASE64"))
         .orElse("")
+val forkRulePackPublicKey =
+    providers
+        .gradleProperty("mahjongForkRulePackPublicKeyBase64")
+        .orElse(providers.environmentVariable("MAHJONG_FORK_RULE_PACK_PUBLIC_KEY_BASE64"))
+        .orElse("")
 val generateRuleTrustRoot =
     tasks.register("generateRuleTrustRoot") {
         val output = generatedResources.map { it.file("META-INF/mahjong-rule-trust-root.txt") }
+        val forkOutput = generatedResources.map { it.file("META-INF/mahjong-fork-rule-trust-root.txt") }
         inputs.property("rulePackPublicKey", rulePackPublicKey)
+        inputs.property("forkRulePackPublicKey", forkRulePackPublicKey)
         outputs.file(output)
+        outputs.file(forkOutput)
         doLast {
             val target = output.get().asFile
             target.parentFile.mkdirs()
             target.writeText(rulePackPublicKey.get().trim() + "\n", Charsets.UTF_8)
+            forkOutput.get().asFile.writeText(forkRulePackPublicKey.get().trim() + "\n", Charsets.UTF_8)
         }
     }
 val generateRuntimeLibraryCatalog =

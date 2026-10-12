@@ -8,6 +8,8 @@ MahjongPaper is a CraftEngine-based Mahjong core for Paper and Folia. The core o
 
 This fork's `fix/lophine-26.3-compat` branch targets Lophine 26.3 with CraftEngine 26.9. See [compatibility and validation](docs/lophine-26.3-compatibility.zh-CN.md) for the tested setup, build instructions and rule-pack limitations.
 
+For Riichi, use the [2.0.2 candidate enabling guide](docs/riichi-lophine-26.3.zh-CN.md). It installs a fork-signed code/resource pair from unchanged upstream CI artifacts; activation requires a full JVM restart.
+
 The current runtime recognizes three rule identities:
 
 - `riichi` — Japanese Mahjong;

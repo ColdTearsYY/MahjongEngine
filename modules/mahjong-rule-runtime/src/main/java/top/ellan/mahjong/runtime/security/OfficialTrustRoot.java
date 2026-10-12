@@ -6,16 +6,17 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 
 import top.ellan.mahjong.runtime.common.RulePackException;
 
-/** Ed25519 public trust root embedded by the release build; no private material is accepted here. */
+/** Build-pinned Ed25519 public trust roots; no private material is accepted here. */
 public final class OfficialTrustRoot {
-    private final PublicKey publicKey;
+    private final List<PublicKey> publicKeys;
 
-    private OfficialTrustRoot(PublicKey publicKey) {
-        this.publicKey = publicKey;
+    private OfficialTrustRoot(List<PublicKey> publicKeys) {
+        this.publicKeys = List.copyOf(publicKeys);
     }
 
     public static OfficialTrustRoot fromX509(byte[] encoded) throws RulePackException {
@@ -24,7 +25,7 @@ public final class OfficialTrustRoot {
             PublicKey key =
                     KeyFactory.getInstance("Ed25519")
                             .generatePublic(new X509EncodedKeySpec(encoded.clone()));
-            return new OfficialTrustRoot(key);
+            return new OfficialTrustRoot(List.of(key));
         } catch (GeneralSecurityException failure) {
             throw new RulePackException("Invalid Ed25519 trust root", failure);
         }
@@ -38,16 +39,27 @@ public final class OfficialTrustRoot {
         }
     }
 
+    /** Adds an explicitly build-pinned fork signer without replacing the official signer. */
+    public OfficialTrustRoot withAdditionalRoot(OfficialTrustRoot additional) {
+        Objects.requireNonNull(additional, "additional");
+        return new OfficialTrustRoot(java.util.stream.Stream.concat(
+                        publicKeys.stream(), additional.publicKeys.stream())
+                .distinct().toList());
+    }
+
     public void verify(byte[] payload, byte[] signature) throws RulePackException {
         Objects.requireNonNull(payload, "payload");
         Objects.requireNonNull(signature, "signature");
         try {
-            Signature verifier = Signature.getInstance("Ed25519");
-            verifier.initVerify(publicKey);
-            verifier.update(payload);
-            if (!verifier.verify(signature)) {
-                throw new RulePackException("Registry Ed25519 signature is invalid");
+            for (PublicKey publicKey : publicKeys) {
+                Signature verifier = Signature.getInstance("Ed25519");
+                verifier.initVerify(publicKey);
+                verifier.update(payload);
+                if (verifier.verify(signature)) {
+                    return;
+                }
             }
+            throw new RulePackException("Registry Ed25519 signature is invalid");
         } catch (GeneralSecurityException failure) {
             throw new RulePackException("Unable to verify registry signature", failure);
         }
