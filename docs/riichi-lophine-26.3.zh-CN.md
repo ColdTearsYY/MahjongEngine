@@ -61,6 +61,10 @@ $env:RIICHI_RESOURCE_PACK_ARTIFACT = Join-Path (Get-Location) 'distribution\riic
 
 2026-10-12 本地完整构建执行 64 个任务，JUnit 304 项，0 failures、0 errors、2 skipped；跳过的两项需要外部 MySQL/MariaDB。日麻两项测试实际执行：成对安装及幂等安装、四人确定性初始化、100 次合法/定时动作推进、公共/私有视图及每步快照恢复；篡改资源会在正式安装前被拒绝。多信任根的六项测试覆盖未知签名者、改动的 payload、坏签名、缺少官方根、错误公钥、私钥和非 Ed25519 输入。
 
-真实服务端的日麻安装、资源生成和完整重启验证正在本次隔离实例中进行，结果将在完成后补充。本地规则测试不等同于客户端视觉或真人完整对局验收。
+真实隔离服务器使用 Lophine `26.3-843-dev/26.3@f06a4d0`、Java 25.0.4、官方 CE 26.9.2 Paper/Folia，新端口 `25851` 和新世界。通过 fork HTTPS registry 完成规则/资源成对安装，verify 返回 `riichi:2.0.2=valid`；完整停服重启后显示 `riichi:2.0.2[active]`，再次 verify 为 valid。CE 启动流程加载日麻模块、生成并上传资源包，最终 ZIP CRC 校验通过，11 个日麻资源文件与上游 ZIP 逐字节一致。安装与重启轮次均 ready、未超时、exit 0，结束后端口无监听。
+
+Windows/Linux [CI 运行 38251069782](https://github.com/ColdTearsYY/MahjongEngine/actions/runs/38251069782) 均通过，两个日麻测试各自实际执行、未跳过。本地、Windows 和 Linux 核心 JAR 摘要一致：`5a94fe222f53beb690ec20d8522828ed5d0bb1247d49ab29ac3a63b56eb146bf`。这是新增 fork 信任根后的核心，不是原兼容说明中的历史 MCR 测试 JAR。
+
+额外尝试的 `mahjong bundle install` 不是支持的命令，没有计入通过项；资源生成验证依据正常的激活后启动流程和生成文件核验。本地规则及服务端检查不等同于客户端视觉或真人完整对局验收。
 
 本轮不修改生产服或旧测试实例。椅子模型在 26.1+ 上的隐式 UV 告警仍保留，未重做模型；客户端表现、真人多人完整对局和生产部署尚未验证。原作者署名与许可保留，不创建上游 PR 或正式 Release。
