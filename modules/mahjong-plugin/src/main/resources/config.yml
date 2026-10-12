@@ -29,7 +29,7 @@ craftengine:
   # variants belong to the bundled CE resource pack, not this operational plugin config.
   bundle-folder: "mahjongpaper"
 presentation:
-  # CE 26.8 has no camera packet API, so only the camera boundary remains operational config.
+  # Only the camera boundary remains operational config; assets belong to the CE bundle.
   overhead:
     enabled: true
     height: 4.5

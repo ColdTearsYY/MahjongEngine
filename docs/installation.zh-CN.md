@@ -5,17 +5,17 @@
 要求：
 
 - Java 25；
-- Paper 或 Folia 26.3；
-- CraftEngine 26.8 API 线（major/minor 必须为 26.8，允许 patch/build 后缀，不接受 26.9；升级 CE API 线前必须先升级 MahjongPaper）；
+- Paper 或 Folia 26.3，包括 Lophine 26.3（实测 build 843）；
+- CraftEngine 26.9 API 线（major/minor 必须为 26.9，允许 patch/build 后缀；实测官方 26.9.2 Paper/Folia 包）；
 - CraftEngine 保持默认的 `misc.delay-configuration-load: true`，以便依赖插件在资源解析前注册行为与条件；
 - 至少一个已安装、已验证并在重启后激活的官方规则包。
 
 步骤：
 
-1. 实际开服从正式 Release 获取 `mahjong-plugin` 的无分类器 thin JAR；普通分支 Actions artifact 只用于 CI/测试，可能没有正式规则信任根。JAR 只包含本仓 Mahjong 模块和 CE bundle；首次加载时 Paper loader 会从 Maven Central 镜像与 Momirealms releases 下载 HikariCP、数据库驱动、AntiGriefLib、Sparrow 与 ASM 到服务端 `libraries/` 缓存，因此首次启动需要访问这两个仓库（离线服须预热该缓存）。
+1. 从本 fork 的 `fix/lophine-26.3-compat` 分支构建，或下载对应成功 Actions 运行中的无分类器 thin JAR，步骤见[兼容验证说明](lophine-26.3-compatibility.zh-CN.md)。本分支专用工作流内嵌已核对的官方公开规则信任根；其他普通分支构建可能没有该信任根。JAR 只包含本仓 Mahjong 模块和 CE bundle；首次加载时 Paper loader 会从 Maven Central 镜像与 Momirealms releases 下载 HikariCP、数据库驱动、AntiGriefLib、Sparrow 与 ASM 到服务端 `libraries/` 缓存，因此首次启动需要访问这两个仓库（离线服须预热该缓存）。
 2. 放入 `plugins/`，同时安装 CraftEngine。
 3. 首次启动会生成 `plugins/MahjongPaper/config.yml`，把插件主体的通用牌桌/凳子/牌资源原子安装到 `plugins/CraftEngine/resources/mahjongpaper`，并把已激活规则的独立资源 ZIP 作为完整 CE pack 安装到 `plugins/CraftEngine/resources/mahjongpaper-rule-<id>-<version>-<jar-sha-prefix>`。插件不另建资源加载路径。
-4. 内容与已加载 bundle 完全相同时可直接恢复；首次安装或任一文件变化时，插件通过 CE 26.8 自身的 reload 生命周期重载配置、生成资源包并等待 `CraftEngineReloadEvent` 后恢复场景，不需要手动执行 `/ce reload all`。
+4. 内容与已加载 bundle 完全相同时可直接恢复；首次安装或任一文件变化时，插件等待 CE 初始加载完成，通过 CE 26.9 自身的 reload 生命周期重载配置、触发 `reload_pack` workflow，并等待 `CraftEngineReloadEvent` 后恢复场景。
 5. 新安装默认使用 [`rule-registry-v2026.08.10.1`](https://github.com/EllanStudio/MahjongEngine/releases/tag/rule-registry-v2026.08.10.1) 的签名 registry；已有配置若仍为空，设置 `rules.registry-url` 为该 Release 的 `registry.json`。正式核心 Release 会内置对应的官方 Ed25519 公钥。
 6. 用 `/mahjong rules install ...`、`verify`、`activate` 安装规则，然后完整重启。
 
@@ -41,3 +41,5 @@ plugins/MahjongPaper/rules/
 `activate` 仍是重启生效的保守路径；`swap`、`deactivate` 与 `rollback` 可即时切换新开牌局及其规则资源。进行中的比赛始终绑定原来的规则 JAR 版本和 SHA-256。
 
 正式 Release 工作流要求 GitHub Actions repository variable `MAHJONG_RULE_PACK_PUBLIC_KEY_BASE64`，其值必须是 Ed25519 X.509 公钥 DER 的 Base64。变量缺失、格式错误或最终 JAR 内嵌值不一致都会直接阻止发布。签名私钥不得进入源码或构建日志；普通分支构建制品不等同于嵌入信任根的正式核心 Release。
+
+本 fork 的构建与实际 Lophine 验证步骤见[兼容验证说明](lophine-26.3-compatibility.zh-CN.md)。

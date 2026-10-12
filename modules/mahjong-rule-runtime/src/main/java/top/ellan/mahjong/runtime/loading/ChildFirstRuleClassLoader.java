@@ -34,11 +34,17 @@ public final class ChildFirstRuleClassLoader extends URLClassLoader {
         if (resource == null) {
             throw new ClassNotFoundException(name);
         }
-        try (InputStream input = resource.openStream()) {
-            byte[] bytecode = RulePackClassInstrumenter.instrument(input.readAllBytes());
-            definePackageIfNeeded(name);
-            CodeSource source = new CodeSource(artifact, (Certificate[]) null);
-            return defineClass(name, bytecode, 0, bytecode.length, source);
+        // URL.openStream() leaves a JVM-global cached JarFile outside this loader's lifecycle.
+        // On Windows that handle prevents the verified staging directory from being moved.
+        try {
+            var connection = resource.openConnection();
+            connection.setUseCaches(false);
+            try (InputStream input = connection.getInputStream()) {
+                byte[] bytecode = RulePackClassInstrumenter.instrument(input.readAllBytes());
+                definePackageIfNeeded(name);
+                CodeSource source = new CodeSource(artifact, (Certificate[]) null);
+                return defineClass(name, bytecode, 0, bytecode.length, source);
+            }
         } catch (IOException | IllegalArgumentException | VerifyError failure) {
             throw new ClassNotFoundException("Unable to instrument rule class " + name, failure);
         }

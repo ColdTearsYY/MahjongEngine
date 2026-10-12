@@ -68,7 +68,7 @@ cd rule-repositories\mahjong-mcr-java
 
 - **场景投影是事件驱动的**，不是逐 tick。`LatestSceneProjector.publish` 用 revision CAS + latest-wins 槽位合并，只在状态变更时跑。麻将桌每秒状态变化只有几次，20 µs/次可以忽略。全仓除 `PersistenceOutbox` 的 50 ms 刷盘外**没有周期性任务**。
 - **场景链路已深度优化过**，不要重复劳动：`SceneNodeIdentity` 有四层无锁有界缓存（tile id、hash 段、player key、interaction handle），`DefaultTableSceneMapper` 的 map 与 bindings 列表都按预估容量预分配，`SceneNodeId.trusted()` 跳过每帧正则校验。首次 publish 的全量排序只发生一次（`slot.applied == null`）。
-- **CE 恢复不扫描世界或实体集合**：table/node/channel/interaction/schema 随家具写入 CE `FurniturePersistentData`；CE 26.8 自己在区块装载时重建家具并调用自定义 behavior 的 `loadCustomData/onLoad`，卸载时调用 `onUnload`。插件的 O(1) 并发语义索引只由这些回调维护，不再有 anchor chunk PDC UUID 索引或 Paper entity add/remove 监听，也不会同步载入区块。私有手牌和静态动作文字均由 CE 条件家具/culling 承担，不再为每名观众维护 Sparrow display 生命周期。
+- **CE 恢复不扫描世界或实体集合**：table/node/channel/interaction/schema 随家具写入 CE `FurniturePersistentData`；CE 自己在区块装载时重建家具并调用自定义 behavior 的 `loadCustomData/onLoad`，卸载时调用 `onUnload`。插件的 O(1) 并发语义索引只由这些回调维护，不再有 anchor chunk PDC UUID 索引或 Paper entity add/remove 监听，也不会同步载入区块。私有手牌和静态动作文字均由 CE 条件家具/culling 承担，不再为每名观众维护 Sparrow display 生命周期。
 - **机器人决策不是瓶颈**。一次弃牌决策要为每个候选打分，约 14 次 `waits()` ≈ 800 µs；但它跑在**独立的 `FairRuleExecutor`**（有界公平池，含每包配额、超时、熔断），不占服务器/region 线程。按每手约 64 次决策计，CPU 占比约 0.08%。**不要为此在规则代码里加缓存换取正确性风险。**
 - **点击路由是 O(1)**。`InteractionRouteRegistry` 用 `ConcurrentHashMap<RouteKey, …>`，没有线性扫描；这是唯一跑在服务器线程上的高频路径。
 - **1.x 的头号热点在 2.0 不存在**。旧版 `LocalizedMessages` 每帧对每座位做 MiniMessage `deserialize` + `serialize`（占插件采样 11.7%）。2.0 的 `LocalizedMessageCatalog` 存纯文本，只做两次 map 查找加 `String.format`。Sparrow MiniMessage 只渲染低频命令帮助页，并把最终 Component 按六种 locale、权限级别和页码有界缓存；HUD/场景路径仍是直接 builder。

@@ -7,15 +7,17 @@ import org.junit.jupiter.api.Test;
 
 class CraftEngineVersionTest {
     @Test
-    void acceptsOnlyThePinned268ApiLine() {
-        assertDoesNotThrow(() -> CraftEngineVersion.requireSupported("26.8"));
-        assertDoesNotThrow(() -> CraftEngineVersion.requireSupported("26.8.1-SNAPSHOT"));
+    void acceptsOnlyThePinned269ApiLine() {
+        assertDoesNotThrow(() -> CraftEngineVersion.requireSupported("26.9"));
+        assertDoesNotThrow(() -> CraftEngineVersion.requireSupported("26.9.2"));
+        assertDoesNotThrow(() -> CraftEngineVersion.requireSupported("26.9.1-SNAPSHOT"));
     }
 
     @Test
     void rejectsOtherApiLinesAndUnknownVersions() {
         assertThrows(IllegalStateException.class, () -> CraftEngineVersion.requireSupported("26.7.4"));
-        assertThrows(IllegalStateException.class, () -> CraftEngineVersion.requireSupported("26.9"));
+        assertThrows(IllegalStateException.class, () -> CraftEngineVersion.requireSupported("26.8.2"));
+        assertThrows(IllegalStateException.class, () -> CraftEngineVersion.requireSupported("26.10"));
         assertThrows(IllegalStateException.class, () -> CraftEngineVersion.requireSupported("27.0"));
         assertThrows(IllegalStateException.class, () -> CraftEngineVersion.requireSupported("dev"));
         assertThrows(IllegalStateException.class, () -> CraftEngineVersion.requireSupported(null));

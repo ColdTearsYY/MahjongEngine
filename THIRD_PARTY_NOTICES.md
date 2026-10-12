@@ -23,7 +23,7 @@ Available license and notice texts remain packaged under `META-INF/licenses`. Op
 ## Supplied separately by the server operator
 
 - Paper/Folia.
-- CraftEngine 26.8 (pinned internal API line).
+- CraftEngine 26.9 (pinned internal API line).
 - The signed Riichi, MCR and Sichuan pure rule JARs and their separately signed resource ZIPs. Each rule resource ZIP carries its own sound attribution and terms.
 
 No GB-Mahjong native source/library, `mahjong-utils`, Kotlin runtime or InvSync is distributed by MahjongPaper 2.0.

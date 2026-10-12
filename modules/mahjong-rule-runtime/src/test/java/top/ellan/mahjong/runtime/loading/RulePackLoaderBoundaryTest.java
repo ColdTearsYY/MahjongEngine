@@ -89,6 +89,45 @@ class RulePackLoaderBoundaryTest {
     }
 
     @Test
+    void acceptsDeclaredTileMetadataAndOnlyItsEmptyParentDirectories() throws Exception {
+        Path jar = jarWith("assets/riichi/tile-visuals.properties",
+                "assets/riichi/tile-visuals.properties", 64 * 1024, true);
+        RulePackException failure = assertThrows(
+                RulePackException.class, () -> new RulePackLoader("2.0.0").load(jar, entry(jar)));
+        assertTrue(failure.getMessage().contains("provider probe failed"), failure.getMessage());
+    }
+
+    @Test
+    void rejectsUndeclaredTileMetadata() throws Exception {
+        assertPresentationRejected(jarWith("assets/riichi/tile-visuals.properties"));
+    }
+
+    @Test
+    void rejectsTileMetadataForAnotherRuleEvenWhenDeclared() throws Exception {
+        assertPresentationRejected(jarWith("assets/mcr/tile-visuals.properties",
+                "assets/mcr/tile-visuals.properties", 1, false));
+    }
+
+    @Test
+    void rejectsOversizedDeclaredTileMetadata() throws Exception {
+        assertPresentationRejected(jarWith("assets/riichi/tile-visuals.properties",
+                "assets/riichi/tile-visuals.properties", 64 * 1024 + 1, false));
+    }
+
+    @Test
+    void rejectsOtherAssetsEvenWithTileMetadataDeclared() throws Exception {
+        assertPresentationRejected(jarWith("assets/riichi/models/tile.json",
+                "assets/riichi/tile-visuals.properties", 1, false));
+    }
+
+    private void assertPresentationRejected(Path jar) throws Exception {
+        RulePackException failure = assertThrows(
+                RulePackException.class, () -> new RulePackLoader("2.0.0").load(jar, entry(jar)));
+        assertTrue(failure.getMessage().contains("must not contain resource-pack content"),
+                failure.getMessage());
+    }
+
+    @Test
     void acceptsTheIntermediateCoreDirectoryEntryAShadedPackContains() throws Exception {
         // Shaded rule packs necessarily contain the parent directory entries of their own package.
         // Those carry no bytecode, so rejecting them would reject every real pack.
@@ -116,8 +155,12 @@ class RulePackLoaderBoundaryTest {
     }
 
     private Path jarWith(String extraEntry) throws Exception {
-        Path jar = temporaryDirectory.resolve(
-                "pack-" + Integer.toHexString(extraEntry.hashCode()) + ".jar");
+        return jarWith(extraEntry, "", 1, false);
+    }
+
+    private Path jarWith(String extraEntry, String resources, int bytes, boolean directories)
+            throws Exception {
+        Path jar = Files.createTempFile(temporaryDirectory, "pack-", ".jar");
         try (OutputStream output = Files.newOutputStream(jar);
                 ZipOutputStream zip = new ZipOutputStream(output)) {
             add(
@@ -126,13 +169,17 @@ class RulePackLoaderBoundaryTest {
                     ("id=riichi\nversion=1.0.0\nspiVersion="
                                     + SpiVersion.CURRENT
                                     + "\nrequiredCoreVersion=>=2.0.0\nstateSchemaVersion=1\n"
-                                    + "requiredResources=\n")
+                                    + "requiredResources=" + resources + "\n")
                             .getBytes(StandardCharsets.ISO_8859_1));
             add(
                     zip,
                     "META-INF/services/" + RulePackProvider.class.getName(),
                     "example.Provider\n".getBytes(StandardCharsets.UTF_8));
-            add(zip, extraEntry, new byte[] {1});
+            if (directories) {
+                add(zip, "assets/", new byte[0]);
+                add(zip, "assets/riichi/", new byte[0]);
+            }
+            add(zip, extraEntry, new byte[bytes]);
         }
         return jar;
     }

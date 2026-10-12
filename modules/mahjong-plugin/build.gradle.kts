@@ -103,8 +103,8 @@ dependencies {
 
     compileOnly("io.papermc.paper:paper-api:$paperApiVersion")
     testImplementation("io.papermc.paper:paper-api:$paperApiVersion")
-    compileOnly("net.momirealms:craft-engine-core:26.8")
-    compileOnly("net.momirealms:craft-engine-bukkit:26.8")
+    compileOnly("net.momirealms:craft-engine-core:26.9")
+    compileOnly("net.momirealms:craft-engine-bukkit:26.9")
 
     runtimeLibraries.forEach { implementation(it) }
 }

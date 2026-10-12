@@ -1,4 +1,4 @@
-# Pinned CraftEngine 26.8 owns static assets, furniture geometry, hitboxes, seats and culling.
+# Pinned CraftEngine 26.9 owns static assets, furniture geometry, hitboxes, seats and culling.
 # Java selects stable IDs and applies scene diffs; it does not recreate these definitions.
 
 templates:
@@ -357,7 +357,7 @@ config_factory#action_button_hitboxes:
                     invisible: true
 
 # Static action text is CE furniture. Labels with semantic arguments remain on the minimal packet
-# path because CE 26.8 does not pass furniture context into text replacement.
+# path to resolve their per-table semantic arguments.
 config_factory#action_labels:
   instances:
     - {key: added_kong}

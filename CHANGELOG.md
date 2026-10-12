@@ -2,6 +2,20 @@
 
 ## 2.0.0 - Unreleased
 
+### Lophine 26.3 compatibility (fork)
+
+- Updated the CraftEngine compile/test dependencies and runtime gate to the 26.9 API line,
+  using the official 26.9.2 Paper/Folia plugin for Lophine 26.3 validation.
+- Migrated pack generation to the configured `reload_pack` workflows and bounded the initial
+  readiness wait on CE's platform scheduler, avoiding the one-tick startup race on Folia.
+- Allowed only manifest-declared `assets/<rule-id>/tile-visuals.properties` metadata up to
+  64 KiB and its empty parent directories; other presentation payloads remain rejected.
+- Disabled JVM-global JAR caching during bytecode instrumentation so verified rule-pack
+  directories can be atomically installed on Windows after the probe loader closes.
+  Added a regression test using the unchanged official MCR artifact.
+- Added metadata boundary tests and documented the signed official rule-pack checks in
+  `docs/lophine-26.3-compatibility.zh-CN.md`.
+
 ### Performance
 
 - Fixed `idx_rank_summary_ladder`, which omitted `total_score` and so diverged from the leaderboard

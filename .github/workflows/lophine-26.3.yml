@@ -1,0 +1,78 @@
+name: Lophine 26.3 compatibility
+
+on:
+  push:
+    branches:
+      - fix/lophine-26.3-compat
+  pull_request:
+    branches:
+      - fix/lophine-26.3-compat
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lophine-26.3-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      # Public verification key from the upstream signed-registry release build.
+      # This is a trust root, never a signing key. See the compatibility guide for provenance.
+      MAHJONG_RULE_PACK_PUBLIC_KEY_BASE64: MCowBQYDK2VwAyEABKsqAQxbRheenJb5AsClim4f1uuCCrdByfaM5AOxlro=
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Fetch the pinned official MCR test artifact
+        shell: pwsh
+        run: |
+          $taskTemp = Join-Path $env:GITHUB_WORKSPACE '.ci-temp'
+          New-Item -ItemType Directory -Force $taskTemp | Out-Null
+          $artifact = Join-Path $taskTemp 'mcr-2.0.1.jar'
+          Invoke-WebRequest -Uri 'https://github.com/EllanServer/mahjong-mcr-java/releases/download/v2.0.1/mcr-rule-pack-2.0.1.jar' -OutFile $artifact -MaximumRetryCount 3 -ConnectionTimeoutSeconds 180
+          if ((Get-FileHash $artifact -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'e07b7e3db3643826fd591fd23a5c985e17b30151efda29b0f41d24085ef20cd1') {
+            throw 'Official MCR artifact checksum mismatch'
+          }
+          "RULE_PACK_ARTIFACT=$artifact" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "TEMP=$taskTemp" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "TMP=$taskTemp" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Build, test and verify the plugin
+        shell: pwsh
+        run: |
+          $toolchains = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64,$env:JAVA_HOME_25_X64"
+          if ($IsWindows) {
+            & ./gradlew.bat build --no-daemon --stacktrace $toolchains -Porg.gradle.java.installations.auto-download=false
+          } else {
+            chmod +x ./gradlew
+            & ./gradlew build --no-daemon --stacktrace $toolchains -Porg.gradle.java.installations.auto-download=false
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload plugin and source artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: MahjongPaper-lophine-26.3-${{ matrix.os }}
+          path: modules/mahjong-plugin/build/libs/*.jar
+          if-no-files-found: error
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lophine-test-reports-${{ matrix.os }}
+          path: modules/*/build/reports/tests/**
+          if-no-files-found: ignore

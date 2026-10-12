@@ -6,7 +6,7 @@
 
 | 制品 | 版本 | 用途与边界 |
 |---|---:|---|
-| `craft-engine-core` / `craft-engine-bukkit` / `craft-engine-bukkit-proxy` | **锁定 26.8** | CE 负责公开家具、持久化/区块重载、实体索引、座位流水线、交互/命中入口、定义重载替换、私有手牌条件元素与选择 variant，以及无动态参数的动作文字家具。场景身份写入 CE `FurniturePersistentData`，自定义 `FurnitureBehavior` 的 load/unload callback 取代 anchor PDC UUID 索引和 Paper entity/furniture 事件；放置直接走 `BukkitFurnitureManager`。bundle 变化通过 CE `reloadPlugin` 与 `PackManager.generateResourcePack` 串行生效。所有几何、颜色、碰撞、culling 和 variant 参数位于 CE 资源包；Java 只提交权威 desired state、规则交互与 O(1) 私有观众授权。26.8 的 `BukkitAdaptor`、network user 和 packet proxy 继续承担世界/客户端代理边界。|
+| `craft-engine-core` / `craft-engine-bukkit` / `craft-engine-bukkit-proxy` | **锁定 26.9** | CE 负责公开家具、持久化/区块重载、实体索引、座位流水线、交互/命中入口、定义重载替换、私有手牌条件元素与选择 variant，以及无动态参数的动作文字家具。场景身份写入 CE `FurniturePersistentData`，自定义 `FurnitureBehavior` 的 load/unload callback 取代 anchor PDC UUID 索引和 Paper entity/furniture 事件；放置直接走 `BukkitFurnitureManager`。bundle 变化通过 CE `reloadPlugin` 与 `PackManager.triggerWorkflows("reload_pack")` 生效。所有几何、颜色、碰撞、culling 和 variant 参数位于 CE 资源包；Java 只提交权威 desired state、规则交互与 O(1) 私有观众授权。26.9 的 `BukkitAdaptor`、network user 和 packet proxy 继续承担世界/客户端代理边界。|
 | `antigrieflib` | 1.0.17 | 已有的 fail-closed 领地保护统一适配层；不自行维护各领地插件分支。|
 | `sparrow-reflection` | 0.34 | 已有的 NMS 类/字段定位。镜头包继续预热并缓存一个类型适配后的 `MethodHandle`：Sparrow 自身源码明确要求跨插件/NMS class loader 时使用 `unreflectSetter()`/MethodHandle，而不是不可见的 nestmate ASM 字段访问器。|
 | `sparrow-yaml` | 1.0.12 | `GameRoomFileCodec` 已取代 Bukkit `YamlConfiguration` 的手工逐字段读写。使用类型化 `NodeSerializer`、拒绝重复键/对象键/alias、限制 200 万 code point，并继续采用临时文件 + 原子替换。每个 registry 独占 codec，方法同步，不共享 Sparrow YAML 的可变 representer。|
@@ -41,9 +41,9 @@ Java 25、G1、256 MiB heap；预热 20,000 次，每组 100,000 次，7 个样�
 | 制品组 | 原因 |
 |---|---|
 | `craft-engine-adventure` | 使用 CE relocated Adventure 类型，与 Paper 的 `net.kyori.adventure` API 不兼容；属于 CE 内部集成包。|
-| `sparrow-heart` | CE 26.8 已接管私有手牌与静态动作文字；保留下来的动态语义文字和镜头实体直接复用 CE 的实体 ID、metadata、packet proxy 与 `NetWorkUser`，不再需要第二套 FakeDisplay 生命周期。|
+| `sparrow-heart` | CE 已接管私有手牌与静态动作文字；保留下来的动态语义文字和镜头实体直接复用 CE 的实体 ID、metadata、packet proxy 与 `NetWorkUser`，不再需要第二套 FakeDisplay 生命周期。|
 | `craft-engine-nms-helper*`、`craft-engine-s3` | CE 内部实现；项目没有手写的对应通用边界可替换。|
-| `sparrow-nbt*` | 不新增独立依赖。家具语义数据使用 CE 26.8 已 relocation 并由 `FurniturePersistentData` 暴露的 NBT 类型；项目没有手写 NBT parser/codec 或 Component↔NBT 转换。再引入一份 Sparrow NBT 只会扩大 JAR。|
+| `sparrow-nbt*` | 不新增独立依赖。家具语义数据使用 CE 已 relocation 并由 `FurniturePersistentData` 暴露的 NBT 类型；项目没有手写 NBT parser/codec 或 Component↔NBT 转换。再引入一份 Sparrow NBT 只会扩大 JAR。|
 | `sparrow-metadata` | 没有跨插件 metadata store 需求；桌面状态必须留在 actor/持久化边界。|
 | `sparrow-redis-message-broker` | 当前是单服权威 actor，没有 Redis 跨服消息契约；引入会制造另一条一致性路径。|
 | `sparrow-reflection-proxy-scanner` | 镜头字段只有运行中 Paper remapper 才能确定，构建期扫描不能替代；当前预热后的 MethodHandle 已是无反射查找热路径。|
@@ -59,7 +59,7 @@ Java 25、G1、256 MiB heap；预热 20,000 次，每组 100,000 次，7 个样�
 - `PlayerRegionTaskScheduler`/`LatestTaskBuffer`：仅用于动态文字、BossBar 与镜头的 Folia 玩家实体调度和 latest-wins 有界合并；
 - 规则 JAR 字节码策略、child-first class loader、签名 registry：安全边界；
 - SQL migration/event store/rank query：Momirealms 仓库没有 SQL 库；
-- `ClientCameraPacketSender`：CE 26.8 没有 camera packet proxy，Sparrow Reflection 的跨 loader MethodHandle 仍是最小实现；
+- `ClientCameraPacketSender`：继续使用 Sparrow Reflection 的跨 loader MethodHandle；
 - 场景差分、权威布局和动作标签宽度计算：纯 Java 热路径；最终几何、颜色、碰撞和静态文字由 CE 资源定义。
 
 ## 发布与许可

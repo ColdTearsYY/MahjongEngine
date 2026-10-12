@@ -6,6 +6,8 @@
 
 MahjongPaper 是一个面向 Paper/Folia 的 CraftEngine 麻将核心。核心负责牌桌、并发、权限、持久化和表现；具体麻将规则由独立、签名并固定版本的规则包提供。
 
+本 fork 的 `fix/lophine-26.3-compat` 分支适配 Lophine 26.3 和 CraftEngine 26.9。已测环境、构建步骤与规则包限制见[兼容验证说明](docs/lophine-26.3-compatibility.zh-CN.md)。
+
 目前支持三类规则身份：
 
 - `riichi`：日麻；
@@ -31,7 +33,7 @@ MahjongPaper 是一个面向 Paper/Folia 的 CraftEngine 麻将核心。核心�
 
 - 一张桌只有一个单写者 actor，不会“每桌一个线程”。
 - 规则包只处理规则，不访问 Bukkit、文件、网络、时钟或线程。
-- CraftEngine 26.8 负责家具放置、持久恢复、区块加载、实体索引、座椅、交互入口、条件元素、模型和资源包生成。
+- CraftEngine 26.9 负责家具放置、持久恢复、区块加载、实体索引、座椅、交互入口、条件元素、模型和资源包生成。
 - 暗手默认关闭：只有被授权玩家能收到正面条件元素，观众表缺失时不会泄露。
 - 每场比赛固定规则包版本、JAR SHA-256、profile、配置、seed 和状态 schema；重启恢复后不会偷偷切换规则。
 - 插件是 thin JAR；HikariCP、数据库驱动、AntiGriefLib、Sparrow 和 ASM 由 Paper loader 下载到服务端 `libraries/` 缓存。
@@ -43,8 +45,8 @@ MahjongPaper 是一个面向 Paper/Folia 的 CraftEngine 麻将核心。核心�
 | 项目 | 要求 |
 |---|---|
 | Java | **25** |
-| 服务端 | Paper/Folia **26.3** |
-| CraftEngine | **26.8 API 线**：major/minor 必须是 26.8；允许 26.8.x 或构建后缀，不接受 26.9 |
+| 服务端 | Paper/Folia **26.3**，包括 Lophine 26.3（实测 build 843） |
+| CraftEngine | **26.9 API 线**：major/minor 必须是 26.9；实测官方 26.9.2 Paper/Folia 插件 |
 | 客户端 | 必须接受 CraftEngine 生成的服务器资源包 |
 | 网络 | 首次启动需访问 Maven Central 镜像与 `repo.momirealms.net` |
 
@@ -59,8 +61,8 @@ MahjongPaper 会在 CE 延迟解析资源前注册自定义 behavior/condition�
 
 ### 2.2 下载和放置
 
-1. 安装 CraftEngine 26.8。
-2. 从 [MahjongEngine Releases](https://github.com/EllanStudio/MahjongEngine/releases) 下载无分类器的 `mahjong-plugin-<version>.jar`。
+1. 安装 CraftEngine 26.9.2 的 Paper/Folia 版本。
+2. 按[兼容验证说明](docs/lophine-26.3-compatibility.zh-CN.md)从本 fork 分支构建无分类器的 `mahjong-plugin-<version>.jar`。
 3. 将 JAR 放进服务端 `plugins/`。
 4. 启动服务端，等待 Paper 下载 runtime libraries，等待 MahjongPaper 安装 CE bundle 并触发 CE reload/资源包生成。
 5. 完全停止服务端，再编辑配置。
@@ -323,7 +325,7 @@ game-rooms:
 - 备份数据库以及整个 `plugins/MahjongPaper/`，不要只备份规则 JAR。
 - 运行中的比赛固定规则版本；不要删除仍被快照引用的版本。
 - H2 备份前应正常停服；外部数据库使用数据库自身的一致性备份工具。
-- 升级核心前先读 Release Notes，并确认仍然要求 CraftEngine 26.8。
+- 升级核心前先读 Release Notes，并确认仍然要求 CraftEngine 26.9。
 - CraftEngine 内部 API 被精确锁定；不要单独升级 CE 后继续运行旧核心。
 - 遇到恢复失败先执行 `/mahjong rules verify` 和 `/mahjong ops status <table-id>`，保留日志、数据库和被隔离的规则包。
 
@@ -331,7 +333,7 @@ game-rooms:
 
 ### 插件提示 CraftEngine 版本不兼容
 
-只能使用 26.8 API 线，并确认 `misc.delay-configuration-load: true`。不要通过修改版本字符串绕过检查。
+只能使用 26.9 API 线，并确认 `misc.delay-configuration-load: true`。不要通过修改版本字符串绕过检查。
 
 ### 第一次启动缺少类或下载失败
 

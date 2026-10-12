@@ -85,7 +85,7 @@ CELESTIAL      起始分 100，升级阈值 200（超出部分结转）
 
 2.0 不保留任何面向旧契约的兼容分支：SPI 只接受 `SpiVersion.CURRENT`，激活状态文件只接受当前字段集，注册表只接受当前格式，动作标签只解析当前键格式，CI 只放行当前 SPI 版本。旧版本号字符串不得残留在生产代码、测试夹具或工作流中。
 
-以下不属于「旧兼容代码」，刻意保留：MCR `Tile.code()` / `Tile.parse(String)` 是 Green Book 文本记号（全部 81 番金标测试依赖它）；`CraftEngineVersion` 是锁定 26.8 内部 API 线的现役门禁；各处 `1.5.0-aligned` 文档注释用于记录对齐目标。
+以下不属于「旧兼容代码」，刻意保留：MCR `Tile.code()` / `Tile.parse(String)` 是 Green Book 文本记号（全部 81 番金标测试依赖它）；`CraftEngineVersion` 是锁定 26.9 内部 API 线的现役门禁；各处 `1.5.0-aligned` 文档注释用于记录对齐目标。
 
 ## 完成定义
 

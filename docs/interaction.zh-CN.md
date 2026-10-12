@@ -30,4 +30,4 @@ CraftEngine YAML 定义可复用的透明 hitbox、碰撞、家具与 culling。
 
 ## 配置边界
 
-资产 ID、通用布局尺寸、容量、开门动画时序位于资源包 `assets/mahjongcraft/mahjong_presentation.properties`；模型、桌椅、牌背、点棒、hitbox、座位、条件、variant 和裁剪位于 `craftengine/configuration/mahjong.yml`。它们都随经过清单校验的 CE bundle 发布，不进入插件 `config.yml`。CE 26.8 尚无 camera packet API，因此 `presentation.overhead` 是唯一保留在插件配置中的表现边界。
+资产 ID、通用布局尺寸、容量、开门动画时序位于资源包 `assets/mahjongcraft/mahjong_presentation.properties`；模型、桌椅、牌背、点棒、hitbox、座位、条件、variant 和裁剪位于 `craftengine/configuration/mahjong.yml`。它们都随经过清单校验的 CE bundle 发布，不进入插件 `config.yml`。镜头仍由插件自身的 camera packet 边界处理，因此 `presentation.overhead` 是唯一保留在插件配置中的表现边界。

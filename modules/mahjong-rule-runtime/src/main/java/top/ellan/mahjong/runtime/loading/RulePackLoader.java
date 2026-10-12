@@ -241,7 +241,7 @@ public final class RulePackLoader implements PinnedRulePackLoader {
                 // registry forever, which would make the classloader unreclaimable after unload.
                 throw new RulePackException("Rule pack must not register a JDBC driver");
             }
-            if (isPresentationResource(name)) {
+            if (isPresentationResource(name, entry.isDirectory(), size, manifest)) {
                 throw new RulePackException(
                         "Rule JAR must not contain resource-pack content: " + name);
             }
@@ -261,7 +261,18 @@ public final class RulePackLoader implements PinnedRulePackLoader {
         }
     }
 
-    private static boolean isPresentationResource(String name) {
+    private static boolean isPresentationResource(
+            String name, boolean directory, long size, RulePackManifest manifest) {
+        String visualMetadata = "assets/" + manifest.ruleId().value() + "/tile-visuals.properties";
+        // This manifest-declared metadata maps semantic tiles to the external resource pack.
+        // It is not a texture/model/audio payload; all other presentation assets remain forbidden.
+        if (manifest.requiredResources().contains(visualMetadata)
+                && ((name.equals(visualMetadata) && !directory && size <= 64 * 1024)
+                        || (directory && size == 0
+                                && (name.equals("assets/")
+                                        || name.equals("assets/" + manifest.ruleId().value() + "/"))))) {
+            return false;
+        }
         String lower = name.toLowerCase(java.util.Locale.ROOT);
         return name.startsWith("assets/")
                 || name.startsWith("resourcepack/")

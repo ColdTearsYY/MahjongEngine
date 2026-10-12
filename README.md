@@ -6,6 +6,8 @@
 
 MahjongPaper is a CraftEngine-based Mahjong core for Paper and Folia. The core owns tables, concurrency, authorization, persistence, and presentation. Versioned rule packs own the actual Mahjong rules.
 
+This fork's `fix/lophine-26.3-compat` branch targets Lophine 26.3 with CraftEngine 26.9. See [compatibility and validation](docs/lophine-26.3-compatibility.zh-CN.md) for the tested setup, build instructions and rule-pack limitations.
+
 The current runtime recognizes three rule identities:
 
 - `riichi` — Japanese Mahjong;
@@ -31,7 +33,7 @@ Player clicks CraftEngine furniture or runs a command
 
 - Each table has one serial writer; there is no thread per table.
 - Rule packs evaluate rules only. They cannot access Bukkit, files, networks, wall clocks, or threads.
-- CraftEngine 26.8 owns furniture placement and recovery, chunk lifecycle, entity indexes, seats, interaction entry points, conditional elements, models, and resource-pack generation.
+- CraftEngine 26.9 owns furniture placement and recovery, chunk lifecycle, entity indexes, seats, interaction entry points, conditional elements, models, and resource-pack generation.
 - Concealed hands fail closed: only an authorized viewer receives face-up private elements.
 - A match pins its rule version, JAR SHA-256, profile, configuration, seed, and state schema. Recovery never silently changes the rules.
 - The plugin is a thin JAR. Paper's library loader downloads HikariCP, database drivers, AntiGriefLib, Sparrow, and ASM into the server `libraries/` cache.
@@ -43,8 +45,8 @@ Player clicks CraftEngine furniture or runs a command
 | Component | Required version |
 |---|---|
 | Java | **25** |
-| Server | Paper/Folia **26.3** |
-| CraftEngine | **26.8 API line**: major/minor must be 26.8; 26.8.x/build suffixes are accepted, 26.9 is not |
+| Server | Paper/Folia **26.3**, including Lophine 26.3 (tested on build 843) |
+| CraftEngine | **26.9 API line**: major/minor must be 26.9; tested with the official 26.9.2 Paper/Folia plugin |
 | Client | Must accept the CraftEngine-generated server resource pack |
 | First boot network | Maven Central mirror and `repo.momirealms.net` |
 
@@ -59,8 +61,8 @@ MahjongPaper registers its CE behaviors and conditions before CE parses the bund
 
 ### 2.2 Install the plugin
 
-1. Install CraftEngine 26.8.
-2. Download the unclassified `mahjong-plugin-<version>.jar` from [MahjongEngine Releases](https://github.com/EllanStudio/MahjongEngine/releases).
+1. Install CraftEngine 26.9.2 for Paper/Folia.
+2. Build the unclassified `mahjong-plugin-<version>.jar` from this fork branch as described in the [compatibility guide](docs/lophine-26.3-compatibility.zh-CN.md).
 3. Put the JAR in the server `plugins/` directory.
 4. Start the server. Let Paper download runtime libraries and let MahjongPaper install/reload its CE bundle and generate the pack.
 5. Stop the server cleanly before editing the generated configuration.
@@ -323,7 +325,7 @@ Accepted aliases include `richi → riichi`, `gb → mcr`, and `MAJSOUL_HANCHAN/
 - Back up the database and the entire `plugins/MahjongPaper/` directory, not only rule JARs.
 - Running matches pin their rule generation. Never delete a version still referenced by snapshots.
 - Stop the server cleanly before copying H2. Use the database vendor's consistent backup tools for external SQL.
-- Read release notes before upgrading the core and verify that its exact CraftEngine requirement remains 26.8.
+- Read release notes before upgrading the core and verify that its exact CraftEngine requirement remains 26.9.
 - MahjongPaper deliberately gates CraftEngine internal APIs by exact version; never update CE alone and keep an older core running.
 - For recovery failures, run `/mahjong rules verify` and `/mahjong ops status <table-id>`, then preserve logs, SQL data, and quarantined artifacts.
 
@@ -331,7 +333,7 @@ Accepted aliases include `richi → riichi`, `gb → mcr`, and `MAJSOUL_HANCHAN/
 
 ### CraftEngine version rejected
 
-Use the exact 26.8 API line and keep `misc.delay-configuration-load: true`. Do not bypass the check by editing a version string.
+Use the exact 26.9 API line and keep `misc.delay-configuration-load: true`. Do not bypass the check by editing a version string.
 
 ### Missing classes or download failures on first boot
 
