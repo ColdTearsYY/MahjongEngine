@@ -55,12 +55,12 @@ jobs:
       - name: Build, test and verify the plugin
         shell: pwsh
         run: |
-          $toolchains = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64,$env:JAVA_HOME_25_X64"
+          $gradleArgs = @('build', '--no-daemon', '--stacktrace', "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64,$env:JAVA_HOME_25_X64", '-Porg.gradle.java.installations.auto-download=false')
           if ($IsWindows) {
-            & ./gradlew.bat build --no-daemon --stacktrace $toolchains -Porg.gradle.java.installations.auto-download=false
+            & ./gradlew.bat @gradleArgs
           } else {
             chmod +x ./gradlew
-            & ./gradlew build --no-daemon --stacktrace $toolchains -Porg.gradle.java.installations.auto-download=false
+            & ./gradlew @gradleArgs
           }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload plugin and source artifacts

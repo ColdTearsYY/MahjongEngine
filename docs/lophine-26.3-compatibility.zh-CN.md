@@ -66,7 +66,7 @@ if ((Get-FileHash $env:RULE_PACK_ARTIFACT -Algorithm SHA256).Hash.ToLowerInvaria
     throw 'Official MCR artifact checksum mismatch'
 }
 & "$env:JAVA_HOME\bin\java.exe" -version
-& .\gradlew.bat build --no-daemon --stacktrace "-Porg.gradle.java.installations.paths=$env:JAVA_HOME,$java21" -Porg.gradle.java.installations.auto-download=false
+& .\gradlew.bat build --no-daemon --stacktrace "-Porg.gradle.java.installations.paths=$env:JAVA_HOME,$java21" '-Porg.gradle.java.installations.auto-download=false'
 if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
 ```
 
